@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 class Actor {
 public:
@@ -59,6 +60,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "[ERROR] IMG INIT: " << IMG_GetError() << std::endl;
+        SDL_Quit();
+        return 1;
+    }
+
     // create the game window
     SDL_Window* window = SDL_CreateWindow(
         "Minen Game",
@@ -86,16 +93,33 @@ int main(int argc, char* argv[]) {
     // keyboard settings
     const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
 
+    // texture of player
+    SDL_Texture* playerTexture = IMG_LoadTexture(renderer, "assets/sheep.png");
+    if (!playerTexture) {
+        std::cerr << "[ERROR] Load texture: " << IMG_GetError() << std::endl;
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
     // main loop
     bool isRunning = true;
     SDL_Event event;
 
-    SDL_Rect rect = { 100, 100, 250, 80 };
+    SDL_Rect rect = { 100, 100, 120, 120 };
 
     while (isRunning) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 isRunning = false;
+            }
+            
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+
+                rect.x = mouseX - rect.w / 2;
+                rect.y = mouseY - rect.h / 2;
             }
         }
 
@@ -120,7 +144,12 @@ int main(int argc, char* argv[]) {
 
         
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &rect);
+        //SDL_RenderFillRect(renderer, &rect);
+        SDL_Rect frameRect = {
+            35, 35, 60, 60
+        };
+
+        SDL_RenderCopy(renderer, playerTexture, &frameRect, &rect);
 
 
         // END EXPERIMENTS
