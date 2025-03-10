@@ -1,8 +1,10 @@
 #include "Player.h"
 #include "Bomb.h"
 
-Player::Player(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, int textureFrameX, int textureFrameY, int textureFrameW, int textureFrameH)
-    : Actor(renderer, texturePath, startX, startY, textureFrameX, textureFrameY, textureFrameW, textureFrameH) {
+const SpriteSettings Player::DEFAULT_PLAYER_SETTINGS = { 32, 32, 60, 60 };
+
+Player::Player(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, const SpriteSettings& spriteSettings)
+    : Actor(renderer, texturePath, startX, startY, spriteSettings) {
 }
 
 void Player::handleInput(const Uint8* keyboardState) {

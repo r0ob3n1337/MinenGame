@@ -72,7 +72,8 @@ int main(int argc, char* argv[]) {
     }
 
 
-    Player player(renderer, "assets/sheep.png", 100, 100, 32, 32, 60, 60);
+    Player player(renderer, "assets/sheep.png", 100, 100);
+    Bomb bomb1(renderer, "assets/sheep.png", 500, 500);
 
     // main loop
     bool isRunning = true;
@@ -98,6 +99,8 @@ int main(int argc, char* argv[]) {
 
         // render player
         player.render();
+
+        bomb1.render();
 
         // render frame
         SDL_RenderPresent(renderer);

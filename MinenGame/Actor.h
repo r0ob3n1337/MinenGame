@@ -6,14 +6,22 @@
 #include <string>
 #include <iostream>
 
+struct SpriteSettings {
+    int frameX = 0;
+    int frameY = 0;
+    int frameW = 32;
+    int frameH = 32;
+};
+
 class Actor {
 protected:
-    int x, y, textureFrameX, textureFrameY, textureFrameW, textureFrameH;
+    int x, y;
+    SpriteSettings spriteSettings;
     SDL_Texture* texture;
     SDL_Renderer* renderer;
 
 public:
-    Actor(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, int textureFrameX, int textureFrameY, int textureFrameW, int textureFrameH);
+    Actor(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, const SpriteSettings& spriteSettings);
     virtual ~Actor();
 
     virtual void render() const;

@@ -1,7 +1,7 @@
 #include "Actor.h"
 
-Actor::Actor(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, int textureFrameX, int textureFrameY, int textureFrameW, int textureFrameH)
-    : renderer(renderer), x(startX), y(startY), textureFrameX(textureFrameX), textureFrameY(textureFrameY), textureFrameW(textureFrameW), textureFrameH(textureFrameH) {
+Actor::Actor(SDL_Renderer* renderer, const std::string& texturePath, int startX, int startY, const SpriteSettings& spriteSettings)
+    : renderer(renderer), x(startX), y(startY), spriteSettings(spriteSettings) {
     texture = IMG_LoadTexture(renderer, texturePath.c_str());
     if (!texture) {
         std::cerr << "Failed to load texture: " << IMG_GetError() << std::endl;
@@ -17,7 +17,8 @@ Actor::~Actor() {
 void Actor::render() const {
     if (texture) {
         SDL_Rect frameRect = { 
-            textureFrameX, textureFrameY, textureFrameW, textureFrameH
+            spriteSettings.frameX, spriteSettings.frameY,
+            spriteSettings.frameW, spriteSettings.frameH,
         };
 
         SDL_Rect destRect = { x, y, 60, 60 };
@@ -34,7 +35,7 @@ int Actor::getY() const {
 }
 
 SDL_Rect Actor::getRect() const {
-    return { x, y, 32, 32 }; // Размер спрайта 32x32
+    return { x, y, 60, 60 }; // sprite size 60x60
 }
 
 bool Actor::intersects(const Actor& other) const {
