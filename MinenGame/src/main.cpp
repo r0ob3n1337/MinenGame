@@ -35,15 +35,18 @@ SDL_Texture* playerTexture = nullptr;
 GoalZone* goalZone = nullptr;
 Notification* notification = nullptr;
 TextButton* restartButton = nullptr;
+TextButton* exitButton = nullptr;
 
 std::vector<Bomb*> bombs;
 
 bool allowPlayerMove = false;
+bool isEndGame = false;
 
 void closeGame() {
     delete goalZone;
     delete notification;
     delete restartButton;
+    delete exitButton;
 
     for (auto& bomb : bombs) {
         delete bomb;
@@ -164,7 +167,7 @@ void showBombsByNSeconds(int seconds) {
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 30, 40, 120, 255);
         SDL_RenderClear(renderer);
 
         renderGrid(renderer, CELL_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -209,7 +212,15 @@ int main(int argc, char* argv[]) {
 
     restartButton = new TextButton(renderer, "Try again", 180, 450, YELLOW_COLOR);
     restartButton->setOnClick([]() {
+        // TODO: add restart game action
         std::cout << "Click" << std::endl;
+    });
+
+    exitButton = new TextButton(renderer, "Exit", 350, 450, YELLOW_COLOR);
+    exitButton->setOnClick([]() {
+        SDL_Event quitEvent;
+        quitEvent.type = SDL_QUIT;
+        SDL_PushEvent(&quitEvent);
     });
 
     while (isRunning) {
@@ -223,6 +234,7 @@ int main(int argc, char* argv[]) {
             }
 
             restartButton->handleEvent(event);
+            exitButton->handleEvent(event);
         }
 
         const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
@@ -232,24 +244,29 @@ int main(int argc, char* argv[]) {
         }
 
         // apply color for next step + fill window by the color
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // R G B A
+        SDL_SetRenderDrawColor(renderer, 30, 40, 120, 255); // R G B A
         SDL_RenderClear(renderer);
-        
-        // render goal zone under the Grid
-        goalZone->render();
 
-        // render cells for minens
-        renderGrid(renderer, 60, WINDOW_WIDTH, WINDOW_HEIGHT);
+        if (isEndGame) {
+            notification->render();
+            restartButton->render();
+            exitButton->render();
+        }
+        else {
+            // render goal zone under the Grid
+            goalZone->render();
 
-        // render player
-        player.render();
+            // render cells for minens
+            renderGrid(renderer, 60, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        notification->render();
-        restartButton->render();
+            // render player
+            player.render();
 
-        if (player.isGoal(*goalZone)) {
-            std::cout << "You are winning son!" << std::endl;
-            // TODO: restart game logic here
+            if (player.isGoal(*goalZone)) {
+                std::cout << "You are winning son!" << std::endl;
+                isEndGame = true;
+                // TODO: restart game logic here
+            }
         }
 
         // render frame
