@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
                 notification->setText("You are wining, son!", "win");
             }
             else {
-                notification->setText("Not for today... Try again!", "lose");
+                notification->setText("Not today... Try again!", "lose");
             }
 
             notification->render();
