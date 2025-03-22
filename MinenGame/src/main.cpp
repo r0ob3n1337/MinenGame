@@ -8,6 +8,7 @@
 #include "../Player.h"
 #include "../Bomb.h"
 #include "../GoalZone.h"
+#include "../Notification.h"
 
 /**
 
@@ -29,6 +30,7 @@ SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* playerTexture = nullptr;
 GoalZone* goalZone = nullptr;
+Notification* notification = nullptr;
 
 std::vector<Bomb*> bombs;
 
@@ -36,6 +38,7 @@ bool allowPlayerMove = false;
 
 void closeGame() {
     delete goalZone;
+    delete notification;
 
     for (auto& bomb : bombs) {
         delete bomb;
@@ -45,6 +48,7 @@ void closeGame() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -89,6 +93,9 @@ bool initSDL() {
         SDL_Quit();
         return false;
     }
+
+    TTF_Init();
+    notification = new Notification(renderer);
 
     return true;
 }
@@ -193,6 +200,7 @@ int main(int argc, char* argv[]) {
     bool isRunning = true;
     SDL_Event event;
 
+    notification->show("You are wining, son!", "win");
 
     while (isRunning) {
         while (SDL_PollEvent(&event)) {
@@ -223,6 +231,8 @@ int main(int argc, char* argv[]) {
 
         // render player
         player.render();
+
+        notification->render();
 
         if (player.isGoal(*goalZone)) {
             std::cout << "You are winning son!" << std::endl;

@@ -152,6 +152,7 @@ xcopy /Y /I "$(ProjectDir)\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="GoalZone.cpp" />
+    <ClCompile Include="Notification.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -159,6 +160,7 @@ xcopy /Y /I "$(ProjectDir)\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="GoalZone.h" />
+    <ClInclude Include="Notification.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
