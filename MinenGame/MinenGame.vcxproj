@@ -155,6 +155,7 @@ xcopy /Y /I "$(ProjectDir)\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Notification.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="TextButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -162,6 +163,7 @@ xcopy /Y /I "$(ProjectDir)\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="GoalZone.h" />
     <ClInclude Include="Notification.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="TextButton.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

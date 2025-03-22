@@ -9,6 +9,8 @@
 #include "../Bomb.h"
 #include "../GoalZone.h"
 #include "../Notification.h"
+#include "../TextButton.h"
+
 
 /**
 
@@ -25,12 +27,14 @@
 const int WINDOW_WIDTH = 600;
 const int WINDOW_HEIGHT = 600;
 const int CELL_SIZE = 60;
+const SDL_Color YELLOW_COLOR = { 255, 255, 0, 255 };
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* playerTexture = nullptr;
 GoalZone* goalZone = nullptr;
 Notification* notification = nullptr;
+TextButton* restartButton = nullptr;
 
 std::vector<Bomb*> bombs;
 
@@ -39,6 +43,7 @@ bool allowPlayerMove = false;
 void closeGame() {
     delete goalZone;
     delete notification;
+    delete restartButton;
 
     for (auto& bomb : bombs) {
         delete bomb;
@@ -202,6 +207,11 @@ int main(int argc, char* argv[]) {
 
     notification->show("You are wining, son!", "win");
 
+    restartButton = new TextButton(renderer, "Try again", 180, 450, YELLOW_COLOR);
+    restartButton->setOnClick([]() {
+        std::cout << "Click" << std::endl;
+    });
+
     while (isRunning) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -211,6 +221,8 @@ int main(int argc, char* argv[]) {
             if (allowPlayerMove) {
                 player.handleEvent(event, CELL_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
             }
+
+            restartButton->handleEvent(event);
         }
 
         const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
@@ -233,6 +245,7 @@ int main(int argc, char* argv[]) {
         player.render();
 
         notification->render();
+        restartButton->render();
 
         if (player.isGoal(*goalZone)) {
             std::cout << "You are winning son!" << std::endl;
