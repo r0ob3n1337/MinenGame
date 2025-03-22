@@ -22,7 +22,7 @@ Notification::~Notification() {
 }
 
 
-void Notification::show(const std::string& message, const std::string& type) {
+void Notification::setText(const std::string& message, const std::string& type) {
 	if (texture) {
 		// reset texture
 		SDL_DestroyTexture(texture);

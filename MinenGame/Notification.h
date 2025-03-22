@@ -15,7 +15,7 @@ public:
 	~Notification();
 
 	// type is WIN or LOSE
-	void show(const std::string& message, const std::string& type);
+	void setText(const std::string& message, const std::string& type);
 	void render() const;
 	void clear();
 };

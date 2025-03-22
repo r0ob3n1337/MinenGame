@@ -14,6 +14,7 @@ public:
     void handleEvent(const SDL_Event& event, int cellSize, int windowWidth, int windowHeight);
     void move(int deltaX, int deltaY, int windowWidth, int windowHeight, int cellSize);
     bool isGoal(const GoalZone& goalZone) const;
+    bool isBang(const Bomb& bomb) const;
     //void checkCollisions(const std::vector<Bomb>& bombs);
 };
 

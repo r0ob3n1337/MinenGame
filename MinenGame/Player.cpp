@@ -51,6 +51,12 @@ bool Player::isGoal(const GoalZone& goalZone) const {
     return SDL_HasIntersection(&playerRect, &goalRect);
 }
 
+bool Player::isBang(const Bomb& bomb) const {
+    SDL_Rect playerRect = getRect();
+    SDL_Rect bombRect = bomb.getRect();
+    return SDL_HasIntersection(&playerRect, &bombRect);
+}
+
 
 //void Player::checkCollisions(const std::vector<Bomb>& bombs) {
 //    for (const auto& bomb : bombs) {

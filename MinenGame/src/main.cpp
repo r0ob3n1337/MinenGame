@@ -37,16 +37,20 @@ Notification* notification = nullptr;
 TextButton* restartButton = nullptr;
 TextButton* exitButton = nullptr;
 
+Player* player = nullptr;
+
 std::vector<Bomb*> bombs;
 
 bool allowPlayerMove = false;
 bool isEndGame = false;
+bool isWin = false;
 
 void closeGame() {
     delete goalZone;
     delete notification;
     delete restartButton;
     delete exitButton;
+    delete player;
 
     for (auto& bomb : bombs) {
         delete bomb;
@@ -122,6 +126,16 @@ void renderGrid(SDL_Renderer* renderer, int cellSize, int width, int height) {
 }
 
 
+void initPlayer() {
+    int playerWidth = 60;
+    int playerHeight = 60;
+    int playerStartX = (WINDOW_WIDTH / 2 / CELL_SIZE) * CELL_SIZE + (CELL_SIZE - playerWidth) / 2;
+    int playerStartY = (WINDOW_HEIGHT - CELL_SIZE) + (CELL_SIZE - playerHeight) / 2;
+
+    player = new Player(renderer, "assets/sheep.png", playerStartX, playerStartY);
+}
+
+
 void initGoalZone(SDL_Renderer* renderer, int cellSize, int gridWidth) {
     int randomCellX = (rand() % gridWidth) * cellSize;
     goalZone = new GoalZone(renderer, randomCellX, 0, cellSize);
@@ -153,6 +167,19 @@ void renderBombs() {
     }
 }
 
+bool playerIsBang() {
+    bool isBang = false;
+
+    for (auto& bomb : bombs) {
+        if (player->isBang(*bomb)) {
+            isBang = true;
+            break;
+        };
+    }
+
+    return isBang;
+}
+
 
 void showBombsByNSeconds(int seconds) {
     Uint32 startTime = SDL_GetTicks();
@@ -175,7 +202,7 @@ void showBombsByNSeconds(int seconds) {
 
         SDL_RenderPresent(renderer);
 
-        if (SDL_GetTicks() - startTime >= seconds * 1000) {
+        if ((SDL_GetTicks() - startTime) >= seconds * 1000) {
             showing = false;
         }
         SDL_Delay(16);
@@ -185,19 +212,34 @@ void showBombsByNSeconds(int seconds) {
 }
 
 
+void restartGame() {
+    delete player;
+    delete goalZone;
+    for (auto& bomb : bombs) {
+        delete bomb;
+    }
+    bombs.clear();
+
+    isEndGame = false;
+    isWin = false;
+    allowPlayerMove = false;
+
+    initPlayer();
+    initGoalZone(renderer, CELL_SIZE, WINDOW_WIDTH / CELL_SIZE);
+    initBombs(renderer, "assets/sheep.png", 10);
+
+    showBombsByNSeconds(3);
+}
+
+
 int main(int argc, char* argv[]) {
     if (!initSDL()) {
         return 1;
     }
 
-    int playerWidth = 60;
-    int playerHeight = 60;
-    int playerStartX = (WINDOW_WIDTH / 2 / CELL_SIZE) * CELL_SIZE + (CELL_SIZE - playerWidth) / 2;
-    int playerStartY = (WINDOW_HEIGHT - CELL_SIZE) + (CELL_SIZE - playerHeight) / 2;
-    Player player(renderer, "assets/sheep.png", playerStartX, playerStartY);
-
     srand(time(nullptr));
 
+    initPlayer();
     initGoalZone(renderer, CELL_SIZE, WINDOW_WIDTH / CELL_SIZE);
     initBombs(renderer, "assets/sheep.png", 10);
     showBombsByNSeconds(3);
@@ -208,12 +250,10 @@ int main(int argc, char* argv[]) {
     bool isRunning = true;
     SDL_Event event;
 
-    notification->show("You are wining, son!", "win");
-
     restartButton = new TextButton(renderer, "Try again", 180, 450, YELLOW_COLOR);
     restartButton->setOnClick([]() {
-        // TODO: add restart game action
-        std::cout << "Click" << std::endl;
+        notification->clear();
+        restartGame();
     });
 
     exitButton = new TextButton(renderer, "Exit", 350, 450, YELLOW_COLOR);
@@ -230,7 +270,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (allowPlayerMove) {
-                player.handleEvent(event, CELL_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
+                player->handleEvent(event, CELL_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
             }
 
             restartButton->handleEvent(event);
@@ -248,6 +288,13 @@ int main(int argc, char* argv[]) {
         SDL_RenderClear(renderer);
 
         if (isEndGame) {
+            if (isWin) {
+                notification->setText("You are wining, son!", "win");
+            }
+            else {
+                notification->setText("Not for today... Try again!", "lose");
+            }
+
             notification->render();
             restartButton->render();
             exitButton->render();
@@ -260,16 +307,22 @@ int main(int argc, char* argv[]) {
             renderGrid(renderer, 60, WINDOW_WIDTH, WINDOW_HEIGHT);
 
             // render player
-            player.render();
+            player->render();
 
-            if (player.isGoal(*goalZone)) {
-                std::cout << "You are winning son!" << std::endl;
+
+            if (playerIsBang()) {
+                std::cout << "Oh no!" << std::endl;
                 isEndGame = true;
+            }
+
+            if (player->isGoal(*goalZone)) {
                 // TODO: restart game logic here
+                std::cout << "You are winning son!" << std::endl;
+                isWin = true;
+                isEndGame = true;
             }
         }
 
-        // render frame
         SDL_RenderPresent(renderer);
     }
 
