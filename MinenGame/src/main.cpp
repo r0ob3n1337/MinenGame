@@ -4,9 +4,10 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <unordered_set>
 #include "../Player.h"
 #include "../Bomb.h"
-#include <unordered_set>
+#include "../GoalZone.h"
 
 /**
 
@@ -24,15 +25,18 @@ const int WINDOW_WIDTH = 600;
 const int WINDOW_HEIGHT = 600;
 const int CELL_SIZE = 60;
 
-
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* playerTexture = nullptr;
+GoalZone* goalZone = nullptr;
 
 std::vector<Bomb*> bombs;
 
+bool allowPlayerMove = false;
 
 void closeGame() {
+    delete goalZone;
+
     for (auto& bomb : bombs) {
         delete bomb;
     }
@@ -103,8 +107,13 @@ void renderGrid(SDL_Renderer* renderer, int cellSize, int width, int height) {
 }
 
 
+void initGoalZone(SDL_Renderer* renderer, int cellSize, int gridWidth) {
+    int randomCellX = (rand() % gridWidth) * cellSize;
+    goalZone = new GoalZone(renderer, randomCellX, 0, cellSize);
+}
+
+
 void initBombs(SDL_Renderer* renderer, const std::string& texturePath, int count) {
-    srand(time(nullptr));
     std::unordered_set<int> occupiedCells;
 
     while (bombs.size() < count) {
@@ -156,6 +165,8 @@ void showBombsByNSeconds(int seconds) {
         }
         SDL_Delay(16);
     }
+
+    allowPlayerMove = true;
 }
 
 
@@ -164,12 +175,21 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Player player(renderer, "assets/sheep.png", 100, 100);
+    int playerWidth = 60;
+    int playerHeight = 60;
+    int playerStartX = (WINDOW_WIDTH / 2 / CELL_SIZE) * CELL_SIZE + (CELL_SIZE - playerWidth) / 2;
+    int playerStartY = (WINDOW_HEIGHT - CELL_SIZE) + (CELL_SIZE - playerHeight) / 2;
+    Player player(renderer, "assets/sheep.png", playerStartX, playerStartY);
 
+    srand(time(nullptr));
+
+    initGoalZone(renderer, CELL_SIZE, WINDOW_WIDTH / CELL_SIZE);
     initBombs(renderer, "assets/sheep.png", 10);
     showBombsByNSeconds(3);
 
-    // main loop
+    // --------------------------
+    // ----- MAIN LOOP START ----
+
     bool isRunning = true;
     SDL_Event event;
 
@@ -179,6 +199,10 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_QUIT) {
                 isRunning = false;
             }
+
+            if (allowPlayerMove) {
+                player.handleEvent(event, CELL_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
+            }
         }
 
         const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
@@ -186,11 +210,13 @@ int main(int argc, char* argv[]) {
             closeGame();
             return 0;
         }
-        player.handleInput(keyboardState);
 
         // apply color for next step + fill window by the color
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // R G B A
         SDL_RenderClear(renderer);
+        
+        // render goal zone under the Grid
+        goalZone->render();
 
         // render cells for minens
         renderGrid(renderer, 60, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -198,9 +224,17 @@ int main(int argc, char* argv[]) {
         // render player
         player.render();
 
+        if (player.isGoal(*goalZone)) {
+            std::cout << "You are winning son!" << std::endl;
+            // TODO: restart game logic here
+        }
+
         // render frame
         SDL_RenderPresent(renderer);
     }
+
+    // ----- MAIN LOOP END ------
+    // --------------------------
 
     // memory free before quit
     closeGame();
